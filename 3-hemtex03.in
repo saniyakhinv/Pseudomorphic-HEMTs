@@ -1,0 +1,131 @@
+go atlas
+
+# -----------------------
+# MESH
+# -----------------------
+mesh
+x.mesh loc=0.0  spac=0.05
+x.mesh loc=0.75 spac=0.05
+
+y.mesh loc=-0.02  spac=0.01
+y.mesh loc=0.0    spac=0.01
+y.mesh loc=0.03   spac=0.001
+y.mesh loc=0.0425 spac=0.01
+y.mesh loc=0.055  spac=0.001
+y.mesh loc=0.2    spac=0.05
+
+# -----------------------
+# REGIONS (composition here)
+# -----------------------
+region num=1 material=GaAs   y.min=0.03 y.max=0.055
+region num=2 material=AlGaAs y.max=0.03 x.composition=0.8
+region num=3 material=AlGaAs y.min=0.055 x.composition=0.3
+region num=4 oxide y.min=-0.02 y.max=0
+
+# -----------------------
+# ELECTRODES
+# -----------------------
+elec num=1 name=source x.min=0   x.max=0   y.min=0.0 y.max=0.05
+elec num=2 name=gate   x.min=0.1 x.max=0.6 y.min=0.0 y.max=0.0
+elec num=3 name=drain  x.min=0.75 x.max=0.75 y.min=0.0 y.max=0.05
+
+# -----------------------
+# DOPING
+# -----------------------
+doping uniform y.min=0 y.max=0.03 n.type conc=1e18
+doping uniform y.min=0.03 n.type conc=1e15
+doping uniform x.min=0.0 x.max=0.05 y.min=0.03 y.max=0.05 n.type conc=1e18
+doping uniform x.min=0.70 x.max=0.75 y.min=0.03 y.max=0.05 n.type conc=1e18
+
+interface x.min=0 x.max=0.75 y.min=-0.01 y.max=0.005 qf=-1e12
+
+# -----------------------
+# MATERIAL MODELS
+# -----------------------
+models srh conmob fldmob bgn fermi
+
+# carrier lifetimes
+material taun0=1e-9 taup0=1e-9
+
+# GaAs (normal)
+material material=GaAs affinity=4.07 eg300=1.424
+
+# AlGaAs (strained) – apply strain effect by altering band parameters MANUALLY
+material material=AlGaAs affinity=3.75 eg300=1.90
+
+# -----------------------
+# CONTACT
+# -----------------------
+contact name=gate workfun=4.73
+
+# -----------------------
+# ID–VD SWEEP
+# -----------------------
+log outf=pseudo_1.log
+method gummel newton trap itlim=20
+output con.band val.band
+
+solve vgate=0.0
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vd_0.str"
+
+solve vdrain=0.05
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vd_0p05.str"
+
+solve vdrain=0.10
+save outf=pseudo.str
+
+solve vdrain=0.20
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vd_0p2.str"
+
+solve vdrain=0.30
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vd_0p3.str"
+
+solve vdrain=0.50
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vd_0p5.str"
+
+solve vdrain=1.0
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vd_1p0.str"
+
+solve vdrain=2.0
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vd_2p0.str"
+
+
+
+# -----------------------
+# ID–VG SWEEP
+# -----------------------
+log outf=pseudo_2.log
+solve init
+
+solve vgate=-1.0 vdrain=0.1
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vg_-1p0.str"
+
+solve vgate=-0.8
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vg_-0p8.str"
+
+solve vgate=-0.6
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vg_-0p6.str"
+
+solve vgate=-0.4
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vg_-0p4.str"
+
+solve vgate=-0.2
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vg_-0p2.str"
+
+solve vgate=0.0
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vg_0p0.str"
+
+solve vgate=0.2
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vg_0p2.str"
+
+solve vgate=0.4
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vg_0p4.str"
+
+solve vgate=0.6
+#save outf="C:/sedatools/examples/deckbuild/4.2.2.R/hemt/hemtex03/vg_0p6.str"
+solve vgate=0.8
+solve vgate=1.0
+solve vgate=1.2
+solve vgate=1.4
+solve vgate=1.6
+quit

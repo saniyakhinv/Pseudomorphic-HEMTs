@@ -1,0 +1,135 @@
+go atlas
+
+# MESH
+mesh
+x.mesh loc=0.0  spac=0.05
+x.mesh loc=0.75 spac=0.05
+
+y.mesh loc=-0.02  spac=0.01
+y.mesh loc=0.0    spac=0.01
+y.mesh loc=0.03   spac=0.001
+y.mesh loc=0.0425 spac=0.01
+y.mesh loc=0.055  spac=0.001
+y.mesh loc=0.2    spac=0.05
+
+# REGIONS (stack from surface y=0 downward into +y)
+# top cap: 300 Å GaAs
+region num=1 material=GaAs y.min=0.00 y.max=0.03
+
+# AlGaAs: 100 Å, x=0.25 (first)
+region num=2 material=AlGaAs y.min=0.03 y.max=0.04 x.composition=0.25
+
+# AlGaAs: 100 Å, x=0.25 (second)
+region num=3 material=AlGaAs y.min=0.04 y.max=0.05 x.composition=0.25
+
+# GaAs: 100 Å
+region num=4 material=GaAs y.min=0.05 y.max=0.06
+
+# AlGaAs: 150 Å, x=0.25
+region num=5 material=AlGaAs y.min=0.06 y.max=0.075 x.composition=0.25
+
+# AlGaAs donor: 200 Å, x=0.25
+region num=6 material=AlGaAs y.min=0.075 y.max=0.095 x.composition=0.25
+
+# AlGaAs spacer: 30 Å, x=0.25 (undoped)
+region num=7 material=AlGaAs y.min=0.095 y.max=0.098 x.composition=0.25
+
+# InGaAs channel: 100 Å, In fraction 0.25 (undoped)
+region num=8 material=InGaAs y.min=0.098 y.max=0.108 x.composition=0.25
+
+# GaAs buffer: 5000 Å
+region num=9 material=GaAs y.min=0.108 y.max=0.608
+
+# oxide region below surface
+region num=10 material=oxide y.min=-0.02 y.max=0.00
+
+# ELECTRODES
+elec num=1 name=source x.min=0   x.max=0   y.min=0.0 y.max=0.05
+elec num=2 name=gate   x.min=0.1 x.max=0.6 y.min=0.0 y.max=0.0
+elec num=3 name=drain  x.min=0.75 x.max=0.75 y.min=0.0 y.max=0.05
+
+# DOPING
+# top GaAs cap: n-type 2e18
+doping region=1 uniform n.type conc=2.e18
+
+# AlGaAs 100Å (first): n-type 1e17
+doping region=2 uniform n.type conc=1.e17
+
+# AlGaAs 100Å (second): n-type 1e18
+doping region=3 uniform n.type conc=1.e18
+
+# GaAs 100Å: n-type 2e18
+doping region=4 uniform n.type conc=2.e18
+
+# AlGaAs 150Å: n-type 5e16
+doping region=5 uniform n.type conc=5.e16
+
+# AlGaAs donor 200Å: n-type 2e18
+doping region=6 uniform n.type conc=2.e18
+
+# spacer (region 7) left undoped
+# InGaAs channel (region 8) left undoped
+# buffer (region 9) left intrinsic
+
+# interface fixed charge (unchanged)
+interface x.min=0 x.max=0.75 y.min=-0.01 y.max=0.005 qf=-1e12
+
+# MATERIAL MODELS
+models srh conmob fldmob bgn fermi 
+
+# carrier lifetimes
+material taun0=1e-9 taup0=1e-9
+
+# GaAs material
+material material=GaAs affinity=4.07 eg300=1.424
+
+# AlGaAs material (composition specified in regions)
+#material material=AlGaAs x.comp=0.25
+
+# InGaAs material (composition specified in regions)
+#material material=InGaAs x.comp=0.25
+
+# CONTACTS
+contact name=source
+contact name=drain
+contact name=gate workfun=4.73
+
+# ensure currents are output to the log
+output con.band val.band 
+
+# ID–VD SWEEP
+# Vg = 0.0
+log outf=pseudo_IdVd_vg0p0.log master
+method gummel newton trap itlim=20
+solve init
+solve vgate=0.0
+solve vdrain=0.05 vstep=0.05 vfinal=2.0 name=drain
+log off
+save outf=pseudo_IdVd_vg0p0.str
+
+# Vg = 0.4
+log outf=pseudo_IdVd_vg0p4.log master
+solve init
+solve vgate=0.4
+solve vdrain=0.05 vstep=0.05 vfinal=2.0 name=drain
+log off
+save outf=pseudo_IdVd_vg0p4.str
+
+# Vg = 0.6
+log outf=pseudo_IdVd_vg0p6.log master
+solve init
+solve vgate=0.6
+solve vdrain=0.05 vstep=0.05 vfinal=2.0 name=drain
+log off
+save outf=pseudo_IdVd_vg0p6.str
+
+# ID–VG SWEEP
+log outf=pseudo_IdVg.log master
+solve init
+method gummel newton trap itlim=20
+solve vdrain=0.1
+solve vgate=-1.0 vstep=0.05 vfinal=1.6 name=gate
+log off
+save outf=pseudo_IdVg.str
+
+quit
